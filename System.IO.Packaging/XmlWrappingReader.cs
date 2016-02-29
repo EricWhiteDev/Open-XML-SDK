@@ -1,14 +1,6 @@
 // Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-/***************************************************************************\
-*
-* File: XmlWrappingReader.cs
-*
-* Purpose:  
-*
-\***************************************************************************/
-
 using System;
 using System.Xml;
 using System.Xml.Schema;

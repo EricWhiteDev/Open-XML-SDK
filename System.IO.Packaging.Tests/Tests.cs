@@ -424,8 +424,6 @@ namespace System.IO.Packaging.Tests
                     Assert.Throws<XmlException>(() =>
                         {
                             PackageProperties pp = package.PackageProperties;
-                            DateTime? c = pp.Created;
-                            DateTime? m = pp.Modified;
                         });
                 }
             }
@@ -2491,8 +2489,6 @@ namespace System.IO.Packaging.Tests
                     {
                         using (Stream partStream = mainPart.GetStream(FileMode.Create, FileAccess.Read))
                         {
-                            XDocument xd = XDocument.Load(partStream);
-                            Assert.True(xd.DescendantNodes().Count() != 0);
                         }
                     });
 
@@ -2502,7 +2498,6 @@ namespace System.IO.Packaging.Tests
                         using (Stream partStream = mainPart.GetStream(FileMode.Create, FileAccess.ReadWrite))
                         {
                             XDocument xd = XDocument.Load(partStream);
-                            Assert.True(xd.DescendantNodes().Count() != 0);
                         }
                     });
 
@@ -2742,7 +2737,6 @@ namespace System.IO.Packaging.Tests
                         using (Stream partStream = mainPart.GetStream(FileMode.OpenOrCreate, FileAccess.Read))
                         {
                             XDocument xd = XDocument.Load(partStream);
-                            Assert.True(xd.DescendantNodes().Count() != 0);
                         }
                     });
                 }
@@ -2840,17 +2834,13 @@ namespace System.IO.Packaging.Tests
                     Assert.Throws<IOException>(() =>
                     {
                         using (Stream partStream = mainPart.GetStream(FileMode.OpenOrCreate, FileAccess.Write))
-                        using (StreamWriter sw = new StreamWriter(partStream))
                         {
-                            sw.Write(TestFileLib.s_DocumentXml);
                         }
                     });
                     Assert.Throws<IOException>(() =>
                     {
                         using (Stream partStream = mainPart.GetStream(FileMode.OpenOrCreate, FileAccess.ReadWrite))
-                        using (StreamWriter sw = new StreamWriter(partStream))
                         {
-                            sw.Write(TestFileLib.s_DocumentXml);
                         }
                     });
                 }
@@ -2884,17 +2874,13 @@ namespace System.IO.Packaging.Tests
                     Assert.Throws<IOException>(() =>
                     {
                         using (Stream partStream = mainPart.GetStream(FileMode.Create, FileAccess.Write))
-                        using (StreamWriter sw = new StreamWriter(partStream))
                         {
-                            sw.Write(TestFileLib.s_DocumentXml);
                         }
                     });
                     Assert.Throws<IOException>(() =>
                     {
                         using (Stream partStream = mainPart.GetStream(FileMode.Create, FileAccess.ReadWrite))
-                        using (StreamWriter sw = new StreamWriter(partStream))
                         {
-                            sw.Write(TestFileLib.s_DocumentXml);
                         }
                     });
                 }
@@ -2928,9 +2914,7 @@ namespace System.IO.Packaging.Tests
                     Assert.Throws<IOException>(() =>
                     {
                         using (Stream partStream = mainPart.GetStream(FileMode.Create, FileAccess.Read))
-                        using (StreamWriter sw = new StreamWriter(partStream))
                         {
-                            sw.Write(TestFileLib.s_DocumentXml);
                         }
                     });
                 }
@@ -2965,9 +2949,7 @@ namespace System.IO.Packaging.Tests
                     Assert.Throws<IOException>(() =>
                     {
                         using (Stream partStream = mainPart.GetStream(FileMode.Open, FileAccess.ReadWrite))
-                        using (StreamWriter sw = new StreamWriter(partStream))
                         {
-                            sw.Write(TestFileLib.s_DocumentXml);
                         }
                     });
                 }
@@ -3001,9 +2983,7 @@ namespace System.IO.Packaging.Tests
                     Assert.Throws<IOException>(() =>
                     {
                         using (Stream partStream = mainPart.GetStream(FileMode.Open, FileAccess.Write))
-                        using (StreamWriter sw = new StreamWriter(partStream))
                         {
-                            sw.Write(TestFileLib.s_DocumentXml);
                         }
                     });
                 }
@@ -3089,9 +3069,7 @@ namespace System.IO.Packaging.Tests
                 Assert.Throws<ArgumentException>(() =>
                 {
                     using (Stream partStream = packagePartDocument.GetStream(FileMode.Truncate, FileAccess.ReadWrite))
-                    using (StreamWriter sw = new StreamWriter(partStream))
                     {
-                        sw.Write(TestFileLib.s_DocumentXml);
                     }
                 });
             }
@@ -3114,9 +3092,7 @@ namespace System.IO.Packaging.Tests
                 Assert.Throws<ArgumentException>(() =>
                 {
                     using (Stream partStream = packagePartDocument.GetStream(FileMode.CreateNew, FileAccess.ReadWrite))
-                    using (StreamWriter sw = new StreamWriter(partStream))
                     {
-                        sw.Write(TestFileLib.s_DocumentXml);
                     }
                 });
             }
@@ -3174,8 +3150,6 @@ namespace System.IO.Packaging.Tests
                 {
                     using (Stream partStream = packagePartDocument.GetStream(FileMode.Create, FileAccess.Read))
                     {
-                        XDocument xd = XDocument.Load(partStream);
-                        Assert.True(xd.DescendantNodes().Count() != 0);
                     }
                 });
             }
