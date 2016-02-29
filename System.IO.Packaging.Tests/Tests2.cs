@@ -297,6 +297,72 @@ namespace System.IO.Packaging.Tests
             fiGuidName.Delete();
         }
 
+        [Fact]
+        public void T300_XmlCompatibilityReader()
+        {
+            string xml = @"<root></root>";
+            using (StringReader sr = new StringReader(xml))
+            using (XmlReader xr = XmlReader.Create(sr))
+            using (XmlCompatibilityReader reader = new XmlCompatibilityReader(xr))
+            {
+                //Skips over the following - ProcessingInstruction, DocumentType, Comment, Whitespace, or SignificantWhitespace
+                //If the reader is currently at a content node then this function call is a no-op
+                var r = reader.MoveToContent();
+                var l = reader.LocalName;
+                while (reader.Read())
+                {
+                    reader.MoveToContent();
+                    if (reader.NodeType == XmlNodeType.None)
+                        continue;
+                }
+            }
+        }
+
+        [Fact]
+        public void T301_XmlCompatibilityReader()
+        {
+            string xml = @"<root xmlns='http://old'></root>";
+            using (StringReader sr = new StringReader(xml))
+            using (XmlReader xr = XmlReader.Create(sr))
+            using (XmlCompatibilityReader reader = new XmlCompatibilityReader(xr))
+            {
+                reader.DeclareNamespaceCompatibility("http://new", "http://old");
+                //Skips over the following - ProcessingInstruction, DocumentType, Comment, Whitespace, or SignificantWhitespace
+                //If the reader is currently at a content node then this function call is a no-op
+                var r = reader.MoveToContent();
+                var l = reader.LocalName;
+                while (reader.Read())
+                {
+                    reader.MoveToContent();
+                    if (reader.NodeType == XmlNodeType.None)
+                        continue;
+                }
+            }
+        }
+
+        [Fact]
+        public void T302_XmlCompatibilityReader()
+        {
+            string xml = @"<root xmlns='http://old'><child></child></root>";
+            using (StringReader sr = new StringReader(xml))
+            using (XmlReader xr = XmlReader.Create(sr))
+            using (XmlCompatibilityReader reader = new XmlCompatibilityReader(xr))
+            {
+                reader.DeclareNamespaceCompatibility("http://new", "http://old");
+                reader.DeclareNamespaceCompatibility("http://new2", "http://old");
+                //Skips over the following - ProcessingInstruction, DocumentType, Comment, Whitespace, or SignificantWhitespace
+                //If the reader is currently at a content node then this function call is a no-op
+                var r = reader.MoveToContent();
+                var l = reader.LocalName;
+                while (reader.Read())
+                {
+                    reader.MoveToContent();
+                    if (reader.NodeType == XmlNodeType.None)
+                        continue;
+                }
+            }
+        }
+
         
 #if false
         [Fact]
