@@ -312,8 +312,6 @@ namespace System.IO.Packaging.Tests
                 while (reader.Read())
                 {
                     reader.MoveToContent();
-                    if (reader.NodeType == XmlNodeType.None)
-                        continue;
                 }
             }
         }
@@ -327,15 +325,11 @@ namespace System.IO.Packaging.Tests
             using (XmlCompatibilityReader reader = new XmlCompatibilityReader(xr))
             {
                 reader.DeclareNamespaceCompatibility("http://new", "http://old");
-                //Skips over the following - ProcessingInstruction, DocumentType, Comment, Whitespace, or SignificantWhitespace
-                //If the reader is currently at a content node then this function call is a no-op
                 var r = reader.MoveToContent();
                 var l = reader.LocalName;
                 while (reader.Read())
                 {
                     reader.MoveToContent();
-                    if (reader.NodeType == XmlNodeType.None)
-                        continue;
                 }
             }
         }
@@ -350,86 +344,153 @@ namespace System.IO.Packaging.Tests
             {
                 reader.DeclareNamespaceCompatibility("http://new", "http://old");
                 reader.DeclareNamespaceCompatibility("http://new2", "http://old");
-                //Skips over the following - ProcessingInstruction, DocumentType, Comment, Whitespace, or SignificantWhitespace
-                //If the reader is currently at a content node then this function call is a no-op
                 var r = reader.MoveToContent();
                 var l = reader.LocalName;
                 while (reader.Read())
                 {
                     reader.MoveToContent();
-                    if (reader.NodeType == XmlNodeType.None)
-                        continue;
                 }
             }
         }
 
-        
-#if false
         [Fact]
-        public void T141_CreatePart_ContentTypeWithSubtypes()
+        public void T303_XmlCompatibilityReader()
         {
-            var docName = "plain.docx";
-            var ba = TestFileLib.GetByteArray(docName);
-            var documentPath = "document.xml";
-            Uri partUriDocument = PackUriHelper.CreatePartUri(new Uri(documentPath, UriKind.Relative));
-
-            using (MemoryStream ms = new MemoryStream())
+            string xml = @"<root xmlns='http://old'><child></child></root>";
+            using (StringReader sr = new StringReader(xml))
+            using (XmlReader xr = XmlReader.Create(sr))
+            using (XmlCompatibilityReader reader = new XmlCompatibilityReader(xr))
             {
-                ms.Write(ba, 0, ba.Length);
-                using (Package package = Package.Open(ms, FileMode.Create, FileAccess.ReadWrite))
+                reader.DeclareNamespaceCompatibility("http://new", "http://old");
+                reader.DeclareNamespaceCompatibility("http://new2", "http://new");
+                var r = reader.MoveToContent();
+                var l = reader.LocalName;
+                while (reader.Read())
                 {
-                    PackagePart packagePartDocument = null;
-                    packagePartDocument = package.CreatePart(partUriDocument, Mime_MediaTypeNames_Text_Xml + "; param1=value1");
+                    reader.MoveToContent();
                 }
             }
         }
-#endif
 
-#if false
         [Fact]
-        public void T001_AddParagraphToDocument()
+        public void T304_XmlCompatibilityReader()
         {
-            var docName = "plain.docx";
-            var fiGuidName = TestFileLib.GetFileSavedWithGuidName(docName);
-
-            XNamespace W = "http://schemas.openxmlformats.org/wordprocessingml/2006/main";
-            using (Package package = Package.Open(fiGuidName.FullName, FileMode.Open))
+            string xml =
+@"<root xmlns='http://old' xmlns:mc='http://schemas.openxmlformats.org/markup-compatibility/2006'>
+  <mc:AlternateContent>
+    <mc:Choice>
+      <p/>
+    </mc:Choice>
+    <mc:Fallback>
+      <p/>
+    </mc:Fallback>
+  </mc:AlternateContent>
+</root>";
+            Assert.Throws<XmlException>(() =>
             {
-                PackageRelationship docPackageRelationship4 =
-                              package
-                              .GetRelationshipsByType("http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument")
-                              .FirstOrDefault();
-
-                Uri documentUri = PackUriHelper
-                    .ResolvePartUri(
-                       new Uri("/", UriKind.Relative),
-                             docPackageRelationship4.TargetUri);
-
-                var mainDocumentPart = package.GetPart(documentUri);
-                XDocument xdMain = null;
-                using (var partStream = mainDocumentPart.GetStream())
+                using (StringReader sr = new StringReader(xml))
+                using (XmlReader xr = XmlReader.Create(sr))
+                using (XmlCompatibilityReader reader = new XmlCompatibilityReader(xr))
                 {
-                    xdMain = XDocument.Load(partStream);
-                    var lastPara = xdMain
-                        .Root
-                        .Elements(W + "body")
-                        .Elements(W + "p")
-                        .LastOrDefault();
-                    lastPara.AddAfterSelf(
-                        new XElement(W + "p",
-                            new XElement(W + "r",
-                                new XElement(W + "t", "Hello again"))));
+                    reader.DeclareNamespaceCompatibility("http://new", "http://old");
+                    reader.DeclareNamespaceCompatibility("http://new2", "http://new");
+                    var r = reader.MoveToContent();
+                    var l = reader.LocalName;
+                    while (reader.Read())
+                    {
+                        reader.MoveToContent();
+                    }
                 }
-                using (var partStream = mainDocumentPart.GetStream(FileMode.Open, FileAccess.ReadWrite))
-                {
-                    xdMain.Save(partStream);
-                }
-            }
-
-            fiGuidName.Delete();
+            });
         }
 
-#endif
+        [Fact]
+        public void T305_XmlCompatibilityReader()
+        {
+            string xml =
+@"<root xmlns='http://old' xmlns:mc='http://schemas.openxmlformats.org/markup-compatibility/2006' xmlns:cx1='http://cx1'>
+  <mc:AlternateContent>
+    <mc:Choice Requires='cx1'>
+      <p/>
+    </mc:Choice>
+    <mc:Fallback>
+      <p/>
+    </mc:Fallback>
+  </mc:AlternateContent>
+</root>";
+
+            using (StringReader sr = new StringReader(xml))
+            using (XmlReader xr = XmlReader.Create(sr))
+            using (XmlCompatibilityReader reader = new XmlCompatibilityReader(xr))
+            {
+                var r = reader.MoveToContent();
+                var l = reader.LocalName;
+                while (reader.Read())
+                {
+                    reader.MoveToContent();
+                }
+            }
+        }
+
+        [Fact]
+        public void T306_XmlCompatibilityReader()
+        {
+            string xml =
+@"<root xmlns='http://old' xmlns:mc='http://schemas.openxmlformats.org/markup-compatibility/2006' xmlns:cx1='http://cx1'>
+    <mc:Choice Requires='cx1'>
+      <p/>
+    </mc:Choice>
+    <mc:Fallback>
+      <p/>
+    </mc:Fallback>
+</root>";
+
+            Assert.Throws<XmlException>(() =>
+                {
+                    using (StringReader sr = new StringReader(xml))
+                    using (XmlReader xr = XmlReader.Create(sr))
+                    using (XmlCompatibilityReader reader = new XmlCompatibilityReader(xr))
+                    {
+                        var r = reader.MoveToContent();
+                        var l = reader.LocalName;
+                        while (reader.Read())
+                        {
+                            reader.MoveToContent();
+                        }
+                    }
+                });
+        }
+
+        [Fact]
+        public void T307_XmlCompatibilityReader()
+        {
+            string xml =
+@"<root xmlns='http://old' xmlns:mc='http://schemas.openxmlformats.org/markup-compatibility/2006' xmlns:cx1='http://cx1'>
+  <mc:AlternateContent>
+    <mc:Fallback>
+      <p/>
+    </mc:Fallback>
+    <mc:Choice Requires='cx1'>
+      <p/>
+    </mc:Choice>
+  </mc:AlternateContent>
+</root>";
+
+            Assert.Throws<XmlException>(() =>
+                {
+                    using (StringReader sr = new StringReader(xml))
+                    using (XmlReader xr = XmlReader.Create(sr))
+                    using (XmlCompatibilityReader reader = new XmlCompatibilityReader(xr))
+                    {
+                        var r = reader.MoveToContent();
+                        var l = reader.LocalName;
+                        while (reader.Read())
+                        {
+                            reader.MoveToContent();
+                        }
+                    }
+                });
+        }
 
     }
 }
